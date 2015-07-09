@@ -1,15 +1,19 @@
 name:                text-zipper
-version:             0.1
+version:             0.1.1
 synopsis:            A text editor zipper library
 description:         This library provides a zipper and API for editing text.
 license:             BSD3
 license-file:        LICENSE
-author:              Jonathan Daugherty
+author:              Jonathan Daugherty <cygnus@foobox.com>
 maintainer:          cygnus@foobox.com
 copyright:           (c) 2015 Jonathan Daugherty
 category:            Text
 build-type:          Simple
 cabal-version:       >=1.10
+
+Source-Repository head
+  type:     git
+  location: git://github.com/jtdaugherty/text-zipper.git
 
 library
   exposed-modules:
