@@ -67,11 +67,11 @@ instance (Show a) => Show (TextZipper a) where
     show tz = concat [ "TextZipper { "
                      , "above = "
                      , show $ above tz
-                     , "below = "
+                     , ", below = "
                      , show $ below tz
-                     , "toLeft = "
+                     , ", toLeft = "
                      , show $ toLeft tz
-                     , "toRight = "
+                     , ", toRight = "
                      , show $ toRight tz
                      , " }"
                      ]
