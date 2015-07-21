@@ -21,6 +21,7 @@ module Data.Text.Zipper
     , currentLine
     , cursorPosition
     , lineLengths
+    , getLineLimit
 
     -- *Navigation and editing functions
     , moveCursor
@@ -56,6 +57,10 @@ data TextZipper a =
        , null_ :: a -> Bool
        , lineLimit :: Maybe Int
        }
+
+-- | Get the line limit, if any, for a zipper.
+getLineLimit :: TextZipper a -> Maybe Int
+getLineLimit = lineLimit
 
 instance (Eq a) => Eq (TextZipper a) where
     a == b = and [ toLeft a == toLeft b
