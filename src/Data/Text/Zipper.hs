@@ -155,6 +155,7 @@ currentLine tz = (toLeft tz) `mappend` (toRight tz)
 -- |Insert a character at the current cursor position.  Move the
 -- cursor one position to the right.
 insertChar :: (Monoid a) => Char -> TextZipper a -> TextZipper a
+insertChar '\n' tz = breakLine tz
 insertChar ch tz = tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
 
 -- |Insert a line break at the current cursor position.
