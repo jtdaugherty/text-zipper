@@ -21,6 +21,7 @@ module Data.Text.Zipper
     , currentLine
     , cursorPosition
     , lineLengths
+    , getLineLimit
 
     -- *Navigation and editing functions
     , moveCursor
@@ -54,7 +55,12 @@ data TextZipper a =
        , last_ :: a -> Char
        , init_ :: a -> a
        , null_ :: a -> Bool
+       , lineLimit :: Maybe Int
        }
+
+-- | Get the line limit, if any, for a zipper.
+getLineLimit :: TextZipper a -> Maybe Int
+getLineLimit = lineLimit
 
 instance (Eq a) => Eq (TextZipper a) where
     a == b = and [ toLeft a == toLeft b
@@ -67,11 +73,11 @@ instance (Show a) => Show (TextZipper a) where
     show tz = concat [ "TextZipper { "
                      , "above = "
                      , show $ above tz
-                     , "below = "
+                     , ", below = "
                      , show $ below tz
-                     , "toLeft = "
+                     , ", toLeft = "
                      , show $ toLeft tz
-                     , "toRight = "
+                     , ", toRight = "
                      , show $ toRight tz
                      , " }"
                      ]
@@ -96,12 +102,17 @@ mkZipper :: (Monoid a) =>
          -- ^'null'.
          -> [a]
          -- ^The initial lines of text.
+         -> Maybe Int
+         -- ^Limit to this many lines of text ('Nothing' means no limit).
          -> TextZipper a
-mkZipper fromCh drp tk lngth lst int nl ls =
-    let (first, rest) = if null ls
+mkZipper fromCh drp tk lngth lst int nl ls lmt =
+    let limitedLs = case lmt of
+          Nothing -> ls
+          Just n -> take n ls
+        (first, rest) = if null limitedLs
                         then (mempty, mempty)
-                        else (head ls, tail ls)
-    in TZ mempty first [] rest fromCh drp tk lngth lst int nl
+                        else (head limitedLs, tail limitedLs)
+    in TZ mempty first [] rest fromCh drp tk lngth lst int nl lmt
 
 -- |Get the text contents of the zipper.
 getText :: (Monoid a) => TextZipper a -> [a]
@@ -155,15 +166,23 @@ currentLine tz = (toLeft tz) `mappend` (toRight tz)
 -- |Insert a character at the current cursor position.  Move the
 -- cursor one position to the right.
 insertChar :: (Monoid a) => Char -> TextZipper a -> TextZipper a
+insertChar '\n' tz = breakLine tz
 insertChar ch tz = tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
 
 -- |Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
 breakLine tz =
-    tz { above = above tz ++ [toLeft tz]
-       , toLeft = mempty
-       }
-
+    -- Plus two because we count the current line and the line we are
+    -- about to create; if that number of lines exceeds the limit,
+    -- ignore this operation.
+    let modified = tz { above = above tz ++ [toLeft tz]
+                      , toLeft = mempty
+                      }
+    in case lineLimit tz of
+          Just lim -> if length (above tz) + length (below tz) + 2 > lim
+                      then tz
+                      else modified
+          Nothing -> modified
 -- |Move the cursor to the end of the current line.
 gotoEOL :: (Monoid a) => TextZipper a -> TextZipper a
 gotoEOL tz = tz { toLeft = currentLine tz
@@ -301,11 +320,11 @@ moveDown tz
     | otherwise = gotoEOL tz
 
 -- |Construct a zipper from list values.
-stringZipper :: [String] -> TextZipper String
+stringZipper :: [String] -> Maybe Int -> TextZipper String
 stringZipper =
     mkZipper (:[]) drop take length last init null
 
 -- |Construct a zipper from 'T.Text' values.
-textZipper :: [T.Text] -> TextZipper T.Text
+textZipper :: [T.Text] -> Maybe Int -> TextZipper T.Text
 textZipper =
     mkZipper T.singleton T.drop T.take T.length T.last T.init T.null
