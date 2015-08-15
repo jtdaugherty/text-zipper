@@ -42,6 +42,7 @@ where
 import Control.Applicative ((<$>))
 import Data.Monoid
 import qualified Data.Text as T
+import qualified Data.Vector as V
 
 data TextZipper a =
     TZ { toLeft :: a
@@ -323,6 +324,11 @@ moveDown tz
 stringZipper :: [String] -> Maybe Int -> TextZipper String
 stringZipper =
     mkZipper (:[]) drop take length last init null
+
+-- |Construct a zipper from vectors of characters.
+vectorZipper :: [V.Vector Char] -> Maybe Int -> TextZipper (V.Vector Char)
+vectorZipper =
+    mkZipper V.singleton V.drop V.take V.length V.last V.init V.null
 
 -- |Construct a zipper from 'T.Text' values.
 textZipper :: [T.Text] -> Maybe Int -> TextZipper T.Text

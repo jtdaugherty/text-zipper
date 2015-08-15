@@ -20,6 +20,7 @@ library
     Data.Text.Zipper
 
   build-depends:       base < 5,
-                       text
+                       text,
+                       vector
   hs-source-dirs:      src
   default-language:    Haskell2010
