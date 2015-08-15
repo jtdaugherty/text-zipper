@@ -9,7 +9,7 @@
 -- is to use 'mkZipper' and provide all of the functions required to
 -- manipulate the underlying text data.
 --
--- Implementation using 'T.Text' and 'String' are provided.
+-- Implementations using 'T.Text' and 'String' are provided.
 module Data.Text.Zipper
     ( TextZipper
 
