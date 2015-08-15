@@ -17,6 +17,7 @@ module Data.Text.Zipper
     , mkZipper
     , textZipper
     , stringZipper
+    , vectorZipper
     , getText
     , currentLine
     , cursorPosition
