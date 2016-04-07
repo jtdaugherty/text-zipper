@@ -155,8 +155,8 @@ moveCursor (row, col) tz =
                , toRight = drop_ tz col (t !! row)
                }
 
-lastLine :: TextZipper a -> Bool
-lastLine = (== 0) . length . below
+isLastLine :: TextZipper a -> Bool
+isLastLine = (== 0) . length . below
 
 nextLine :: TextZipper a -> a
 nextLine = head . below
@@ -304,7 +304,7 @@ moveUp tz
 moveDown :: (Monoid a) => TextZipper a -> TextZipper a
 moveDown tz
     -- Is there a line below at least as long as the current one?
-    | (not $ lastLine tz) &&
+    | (not $ isLastLine tz) &&
       (length_ tz $ nextLine tz) >= length_ tz (toLeft tz) =
         tz { below = tail $ below tz
            , above = above tz ++ [currentLine tz]
