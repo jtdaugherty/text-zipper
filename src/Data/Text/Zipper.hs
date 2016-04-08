@@ -312,7 +312,7 @@ moveDown tz
            , toRight = drop_ tz (length_ tz $ toLeft tz) (nextLine tz)
            }
     -- Or if there is a line below, just go to the end of it
-    | (not $ null (below tz)) =
+    | (not $ isLastLine tz) =
         tz { above = above tz ++ [currentLine tz]
            , below = tail $ below tz
            , toLeft = nextLine tz
