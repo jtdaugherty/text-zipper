@@ -17,6 +17,7 @@ module Data.Text.Zipper
     , mkZipper
     , textZipper
     , stringZipper
+    , clearZipper
     , vectorZipper
     , getText
     , currentLine
@@ -333,6 +334,15 @@ stringZipper =
 vectorZipper :: [V.Vector Char] -> Maybe Int -> TextZipper (V.Vector Char)
 vectorZipper =
     mkZipper V.singleton V.drop V.take V.length V.last V.init V.null
+
+-- |Empty a zipper.
+clearZipper :: (Monoid a) => TextZipper a -> TextZipper a
+clearZipper tz =
+    tz { toLeft = mempty
+       , toRight = mempty
+       , above = []
+       , below = []
+       }
 
 -- |Construct a zipper from 'T.Text' values.
 textZipper :: [T.Text] -> Maybe Int -> TextZipper T.Text
