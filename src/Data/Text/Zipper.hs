@@ -155,8 +155,11 @@ moveCursor (row, col) tz =
                , toRight = drop_ tz col (t !! row)
                }
 
-lastLine :: TextZipper a -> Bool
-lastLine = (== 0) . length . below
+isFirstLine :: TextZipper a -> Bool
+isFirstLine = null . above
+
+isLastLine :: TextZipper a -> Bool
+isLastLine = (== 0) . length . below
 
 nextLine :: TextZipper a -> a
 nextLine = head . below
@@ -281,7 +284,7 @@ moveLeft tz
 moveUp :: (Monoid a) => TextZipper a -> TextZipper a
 moveUp tz
     -- Is there a line above at least as long as the current one?
-    | (not $ null (above tz)) &&
+    | (not $ isFirstLine tz) &&
       (length_ tz $ last $ above tz) >= length_ tz (toLeft tz) =
         tz { below = currentLine tz : below tz
            , above = init $ above tz
@@ -289,7 +292,7 @@ moveUp tz
            , toRight = drop_ tz (length_ tz $ toLeft tz) (last $ above tz)
            }
     -- Or if there is a line above, just go to the end of it
-    | (not $ null (above tz)) =
+    | (not $ isFirstLine tz) =
         tz { above = init $ above tz
            , below = currentLine tz : below tz
            , toLeft = last $ above tz
@@ -304,7 +307,7 @@ moveUp tz
 moveDown :: (Monoid a) => TextZipper a -> TextZipper a
 moveDown tz
     -- Is there a line below at least as long as the current one?
-    | (not $ lastLine tz) &&
+    | (not $ isLastLine tz) &&
       (length_ tz $ nextLine tz) >= length_ tz (toLeft tz) =
         tz { below = tail $ below tz
            , above = above tz ++ [currentLine tz]
@@ -312,7 +315,7 @@ moveDown tz
            , toRight = drop_ tz (length_ tz $ toLeft tz) (nextLine tz)
            }
     -- Or if there is a line below, just go to the end of it
-    | (not $ null (below tz)) =
+    | (not $ isLastLine tz) =
         tz { above = above tz ++ [currentLine tz]
            , below = tail $ below tz
            , toLeft = nextLine tz
