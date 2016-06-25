@@ -42,6 +42,7 @@ module Data.Text.Zipper
 where
 
 import Control.Applicative ((<$>))
+import Control.DeepSeq
 import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Vector as V
@@ -60,6 +61,13 @@ data TextZipper a =
        , null_ :: a -> Bool
        , lineLimit :: Maybe Int
        }
+
+instance (NFData a) => NFData (TextZipper a) where
+    rnf z = (toLeft z) `deepseq`
+            (toRight z) `deepseq`
+            (above z) `deepseq`
+            (below z) `deepseq`
+            ()
 
 -- | Get the line limit, if any, for a zipper.
 getLineLimit :: TextZipper a -> Maybe Int
