@@ -1,0 +1,46 @@
+0.5
+---
+
+- Added killToBOL function (thanks Hans-Peter Deifel)
+- Enabled -Wall
+- Added dependency on deepseq
+- Added NFData instance for TextZipper
+
+0.4
+---
+
+- Added clearZipper
+- Added isFirstLine (thanks Kwang Yul Seo)
+- Renamed lastLine to isLastLine (thanks Kwang Yul Seo)
+
+0.3.1
+-----
+
+- Fixed export of vectorZipper
+
+0.3
+---
+
+- Added vectorZipper for zipping over vectors of characters
+
+0.2.1
+-----
+
+- Exported getLineLimit to permit obtaining a zipper's line limit
+
+0.2
+---
+
+- Added support for limiting the number of lines in the zipper
+- insertChar "\n" is now equivalent to breakLine
+- Improved Show instance for TextZipper
+
+0.1.1
+-----
+
+- Updated package metadata
+
+0.1
+---
+
+Initial release (originally split off from vty-ui)
