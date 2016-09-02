@@ -28,6 +28,7 @@ module Data.Text.Zipper
     -- *Navigation and editing functions
     , moveCursor
     , insertChar
+    , insertMany
     , breakLine
     , killToEOL
     , gotoEOL
@@ -182,6 +183,11 @@ currentLine tz = (toLeft tz) `mappend` (toRight tz)
 insertChar :: (Monoid a) => Char -> TextZipper a -> TextZipper a
 insertChar '\n' tz = breakLine tz
 insertChar ch tz = tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
+
+-- |Insert many characters at the current cursor position. Move the
+-- cursor one position to the end of the inserted text.
+insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
+insertMany cs tz = tz { toLeft = toLeft tz `mappend` cs }
 
 -- |Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
