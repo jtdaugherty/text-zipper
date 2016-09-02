@@ -31,6 +31,7 @@ module Data.Text.Zipper
     , insertMany
     , breakLine
     , killToEOL
+    , killToBOL
     , gotoEOL
     , gotoBOL
     , deletePrevChar
@@ -221,6 +222,12 @@ killToEOL tz
              }
     | otherwise = tz { toRight = mempty
                      }
+
+-- |Remove all text from the cursor position to the beginning of the
+-- current line.
+killToBOL :: Monoid a => TextZipper a -> TextZipper a
+killToBOL tz = tz { toLeft = mempty
+                  }
 
 -- |Delete the character preceding the cursor position, and move the
 -- cursor backwards by one character.
