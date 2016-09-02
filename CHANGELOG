@@ -1,3 +1,8 @@
+0.6
+---
+
+- Add insertMany for faster bulk insertion
+
 0.5
 ---
 
