@@ -1,5 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Data.Text.Zipper.Generic where
+module Data.Text.Zipper.Generic
+    ( GenericTextZipper(..)
+    , Data.Text.Zipper.Generic.textZipper
+    )
+where
 
 import qualified Prelude
 import           Prelude hiding (drop, take, length, last, init, null, lines)
@@ -49,7 +53,7 @@ instance GenericTextZipper (V.Vector Char) where
   last      = V.last
   init      = V.init
   null      = V.null
-  lines     = V.lines
+  lines     = V.vecLines
 
 textZipper :: GenericTextZipper a =>
               [a] -> Maybe Int -> TextZipper a

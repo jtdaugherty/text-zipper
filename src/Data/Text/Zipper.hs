@@ -372,7 +372,7 @@ stringZipper =
 -- |Construct a zipper from vectors of characters.
 vectorZipper :: [V.Vector Char] -> Maybe Int -> TextZipper (V.Vector Char)
 vectorZipper =
-    mkZipper V.singleton V.drop V.take V.length V.last V.init V.null V.lines
+    mkZipper V.singleton V.drop V.take V.length V.last V.init V.null V.vecLines
 
 -- |Empty a zipper.
 clearZipper :: (Monoid a) => TextZipper a -> TextZipper a
