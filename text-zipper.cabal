@@ -1,5 +1,5 @@
 name:                text-zipper
-version:             0.6.1
+version:             0.7
 synopsis:            A text editor zipper library
 description:         This library provides a zipper and API for editing text.
 license:             BSD3
@@ -18,6 +18,10 @@ Source-Repository head
 library
   exposed-modules:
     Data.Text.Zipper
+    Data.Text.Zipper.Generic
+
+  other-modules:
+    Data.Text.Zipper.Vector
 
   build-depends:       base < 5,
                        text,
