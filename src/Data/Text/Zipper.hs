@@ -48,6 +48,7 @@ import Control.DeepSeq
 import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Vector as V
+import qualified Data.Text.Zipper.Vector as V
 
 data TextZipper a =
     TZ { toLeft :: a
@@ -371,13 +372,7 @@ stringZipper =
 -- |Construct a zipper from vectors of characters.
 vectorZipper :: [V.Vector Char] -> Maybe Int -> TextZipper (V.Vector Char)
 vectorZipper =
-    let vecLines v | V.null v  = []
-                   | otherwise = case V.elemIndex '\n' v of
-                       Nothing -> [v]
-                       Just i -> let (h, t) = V.splitAt i v
-                                 in h : vecLines t
-
-    in mkZipper V.singleton V.drop V.take V.length V.last V.init V.null vecLines
+    mkZipper V.singleton V.drop V.take V.length V.last V.init V.null V.lines
 
 -- |Empty a zipper.
 clearZipper :: (Monoid a) => TextZipper a -> TextZipper a

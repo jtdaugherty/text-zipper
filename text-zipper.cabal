@@ -18,6 +18,10 @@ Source-Repository head
 library
   exposed-modules:
     Data.Text.Zipper
+    Data.Text.Zipper.Generic
+
+  other-modules:
+    Data.Text.Zipper.Vector
 
   build-depends:       base < 5,
                        text,
