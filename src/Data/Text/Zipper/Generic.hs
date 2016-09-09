@@ -11,7 +11,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Zipper.Vector as V
 import qualified Data.Vector as V
 
-import           Data.Monoid ()
+import           Data.Monoid
 
 import           Data.Text.Zipper
 
