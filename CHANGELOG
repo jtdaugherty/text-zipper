@@ -1,3 +1,8 @@
+0.7.1
+-----
+
+- Generic: import everything from Monoid for older GHCs
+
 0.7
 ---
 
