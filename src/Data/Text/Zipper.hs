@@ -32,6 +32,11 @@ module Data.Text.Zipper
     , breakLine
     , killToEOL
     , killToBOL
+    , killWord
+    , killWordBackwards
+    , getNextChar
+    , getPrevChar
+    , getWord
     , gotoEOL
     , gotoBOL
     , deletePrevChar
@@ -46,6 +51,7 @@ where
 import Control.Applicative ((<$>))
 import Control.DeepSeq
 import Data.Monoid
+import Data.Char
 import qualified Data.Text as T
 import qualified Data.Vector as V
 import qualified Data.Text.Zipper.Vector as V
@@ -246,6 +252,69 @@ killToEOL tz
 killToBOL :: Monoid a => TextZipper a -> TextZipper a
 killToBOL tz = tz { toLeft = mempty
                   }
+
+killWordWith :: (Eq a, Monoid a)
+             => (TextZipper a -> TextZipper a)
+             -> (TextZipper a -> Maybe Char)
+             -> TextZipper a -> TextZipper a
+killWordWith delChar getCh tz = deleteWordChars (deleteSpaces tz)
+  where
+  deleteSpaces    = deleteBy isSpace
+  deleteWordChars = deleteBy isWordChar
+  isWordChar c    = isAlphaNum c || c == '_'
+  deleteBy p z    = case getCh z of
+    Nothing -> z
+    Just c  | p c       -> deleteBy p (delChar z)
+            | otherwise -> z
+
+killWord :: (Eq a, Monoid a) => TextZipper a -> TextZipper a
+killWord = killWordWith deleteChar getNextChar
+
+-- |Remove word from cursor position to start of previous word.
+killWordBackwards :: (Eq a, Monoid a) => TextZipper a -> TextZipper a
+killWordBackwards = killWordWith deletePrevChar getPrevChar
+
+getNextChar :: (Eq a, Monoid a) => TextZipper a -> Maybe Char
+getNextChar tz
+    | moveRight tz == tz = Nothing
+    | otherwise = let left = toLeft (moveRight tz)
+                  in if null_ tz left
+                       then Nothing
+                       else Just (last_ tz left)
+
+getPrevChar :: (Eq a, Monoid a) => TextZipper a -> Maybe Char
+getPrevChar tz
+    | moveLeft tz == tz = Nothing
+    | otherwise = let left = toLeft tz
+                  in if null_ tz left
+                       then Nothing
+                       else Just (last_ tz left)
+
+getThing :: Monoid a
+         => (TextZipper a -> Maybe a) -- ^ get characters to the left
+         -> (TextZipper a -> Maybe a) -- ^ get characters to the right
+         -> TextZipper a
+         -> Maybe a
+getThing getLeft getRight tz =
+  combine (getLeft tz) (getRight tz)
+  where
+  -- XXX: Does this exist in the libraries already?
+  combine ma mb = case (ma,mb) of
+    (Nothing, Nothing) -> Nothing
+    (Nothing, Just b)  -> Just b
+    (Just  a, Nothing) -> Just a
+    (Just  a, Just b)  -> Just $ a <> b
+
+getWord :: (Eq a, Monoid a) => TextZipper a -> Maybe a
+getWord = getThing getLeftWord getRightWord
+  where
+  isWordChar c = isAlphaNum c || c == '_'
+  get getCh acc move tz = case getCh tz of
+    Nothing -> return acc
+    Just c  | isWordChar c -> get getCh (acc <> fromChar tz c) move (move tz)
+            | otherwise    -> return acc
+  getLeftWord  = get getPrevChar mempty moveLeft
+  getRightWord = get getNextChar mempty moveRight
 
 -- |Delete the character preceding the cursor position, and move the
 -- cursor backwards by one character.
