@@ -40,6 +40,7 @@ module Data.Text.Zipper
     , moveLeft
     , moveUp
     , moveDown
+    , transposeChars
     )
 where
 
@@ -363,6 +364,29 @@ moveDown tz
            }
     -- If nothing else, go to the end of the current line
     | otherwise = gotoEOL tz
+
+-- | Transpose the character before the cursor with the one at the
+-- cursor position and move the cursor one position to the right. If
+-- the cursor is at the end of the current line, transpose the current
+-- line's last two characters.
+transposeChars :: (Monoid a) => TextZipper a -> TextZipper a
+transposeChars tz
+    | null_ tz (toLeft tz) = tz
+    | null_ tz (toRight tz) =
+        if length_ tz (toLeft tz) < 2
+        then tz
+        else let prefixLen = length_ tz (toLeft tz) - 2
+                 prefix = take_ tz prefixLen (toLeft tz)
+                 lastTwo = drop_ tz prefixLen (toLeft tz)
+                 a = take_ tz 1 lastTwo
+                 b = drop_ tz 1 lastTwo
+             in tz { toLeft = prefix <> b <> a
+                   }
+    | otherwise = tz { toLeft = (init_ tz $ toLeft tz) <>
+                                (take_ tz 1 $ toRight tz) <>
+                                (fromChar tz $ last_ tz $ toLeft tz)
+                     , toRight = (drop_ tz 1 $ toRight tz)
+                     }
 
 -- |Construct a zipper from list values.
 stringZipper :: [String] -> Maybe Int -> TextZipper String
