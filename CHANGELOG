@@ -1,3 +1,8 @@
+0.8.2
+-----
+
+- Fixed insertMany for zippers with no line limit
+
 0.8.1
 -----
 
