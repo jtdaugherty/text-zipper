@@ -195,8 +195,12 @@ insertChar ch tz = tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
 insertMany cs tz =
     let ls = lines_ tz cs
+        go []     z = z
+        go (a:as) z = go as $ breakLine $ z { toLeft = toLeft z `mappend` a }
     in case lineLimit tz of
-        Nothing    -> tz { toLeft = toLeft tz `mappend` cs }
+        Nothing    ->
+            let toInsert = ls
+            in go toInsert tz
         Just limit ->
             -- How many more lines can we add without violating the
             -- limit?
@@ -204,9 +208,6 @@ insertMany cs tz =
                 remainingLines = max 0 (limit - totalLines)
                 totalLines = length (above tz) +
                              length (below tz)
-
-                go []     z = z
-                go (a:as) z = go as $ breakLine $ z { toLeft = toLeft z `mappend` a }
             in go toInsert tz
 
 -- |Insert a line break at the current cursor position.
