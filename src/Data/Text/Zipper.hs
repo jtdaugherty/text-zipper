@@ -196,7 +196,8 @@ insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
 insertMany cs tz =
     let ls = lines_ tz cs
         go []     z = z
-        go (a:as) z = go as $ breakLine $ z { toLeft = toLeft z `mappend` a }
+        go (a:as) z = let maybeBreak = if null as then id else breakLine
+                      in go as $ maybeBreak $ z { toLeft = toLeft z `mappend` a }
     in case lineLimit tz of
         Nothing    ->
             let toInsert = ls
