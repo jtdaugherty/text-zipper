@@ -46,6 +46,7 @@ where
 
 import Control.Applicative ((<$>))
 import Control.DeepSeq
+import Data.Char (isPrint)
 import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Vector as V
@@ -64,6 +65,7 @@ data TextZipper a =
        , init_ :: a -> a
        , null_ :: a -> Bool
        , lines_ :: a -> [a]
+       , toList_ :: a -> [Char]
        , lineLimit :: Maybe Int
        }
 
@@ -118,19 +120,21 @@ mkZipper :: (Monoid a) =>
          -- ^'null'.
          -> (a -> [a])
          -- ^'lines'.
+         -> (a -> [Char])
+         -- ^'toList'.
          -> [a]
          -- ^The initial lines of text.
          -> Maybe Int
          -- ^Limit to this many lines of text ('Nothing' means no limit).
          -> TextZipper a
-mkZipper fromCh drp tk lngth lst int nl linesFunc ls lmt =
+mkZipper fromCh drp tk lngth lst int nl linesFunc toListF ls lmt =
     let limitedLs = case lmt of
           Nothing -> ls
           Just n -> take n ls
         (first, rest) = if null limitedLs
                         then (mempty, mempty)
                         else (head limitedLs, tail limitedLs)
-    in TZ mempty first [] rest fromCh drp tk lngth lst int nl linesFunc lmt
+    in TZ mempty first [] rest fromCh drp tk lngth lst int nl linesFunc toListF lmt
 
 -- |Get the text contents of the zipper.
 getText :: (Monoid a) => TextZipper a -> [a]
@@ -184,36 +188,37 @@ nextLine = head . below
 currentLine :: (Monoid a) => TextZipper a -> a
 currentLine tz = (toLeft tz) `mappend` (toRight tz)
 
--- |Insert a character at the current cursor position.  Move the
--- cursor one position to the right.
+-- |Insert a character at the current cursor position.
+--
+-- If the character is a newline, break the current line.
+--
+-- If the character is non-printable, ignore it.
+--
+-- Otherwise insert the character and move the cursor one position to
+-- the right.
 insertChar :: (Monoid a) => Char -> TextZipper a -> TextZipper a
-insertChar '\n' tz = breakLine tz
-insertChar ch tz = tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
+insertChar ch tz = maybe tz id $ insertChar_ ch tz
+
+insertChar_ :: (Monoid a) => Char -> TextZipper a -> Maybe (TextZipper a)
+insertChar_ ch tz
+    | ch == '\n' = breakLine_ tz
+    | isPrint ch = Just $ tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
+    | otherwise  = Nothing
 
 -- |Insert many characters at the current cursor position. Move the
--- cursor one position to the end of the inserted text.
+-- cursor to the end of the inserted text.
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
-insertMany cs tz =
-    let ls = lines_ tz cs
-        go []     z = z
-        go (a:as) z = let maybeBreak = if null as then id else breakLine
-                      in go as $ maybeBreak $ z { toLeft = toLeft z `mappend` a }
-    in case lineLimit tz of
-        Nothing    ->
-            let toInsert = ls
-            in go toInsert tz
-        Just limit ->
-            -- How many more lines can we add without violating the
-            -- limit?
-            let toInsert = take remainingLines ls
-                remainingLines = max 0 (limit - totalLines)
-                totalLines = length (above tz) +
-                             length (below tz)
-            in go toInsert tz
+insertMany str tz =
+    let go [] z = z
+        go (c:cs) z = maybe z (go cs) $ insertChar_ c z
+    in go (toList_ tz str) tz
 
 -- |Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
-breakLine tz =
+breakLine tz = maybe tz id $ breakLine_ tz
+
+breakLine_ :: (Monoid a) => TextZipper a -> Maybe (TextZipper a)
+breakLine_ tz =
     -- Plus two because we count the current line and the line we are
     -- about to create; if that number of lines exceeds the limit,
     -- ignore this operation.
@@ -222,9 +227,10 @@ breakLine tz =
                       }
     in case lineLimit tz of
           Just lim -> if length (above tz) + length (below tz) + 2 > lim
-                      then tz
-                      else modified
-          Nothing -> modified
+                      then Nothing
+                      else Just modified
+          Nothing -> Just modified
+
 -- |Move the cursor to the end of the current line.
 gotoEOL :: (Monoid a) => TextZipper a -> TextZipper a
 gotoEOL tz = tz { toLeft = currentLine tz
@@ -393,12 +399,12 @@ transposeChars tz
 -- |Construct a zipper from list values.
 stringZipper :: [String] -> Maybe Int -> TextZipper String
 stringZipper =
-    mkZipper (:[]) drop take length last init null lines
+    mkZipper (:[]) drop take length last init null lines id
 
 -- |Construct a zipper from vectors of characters.
 vectorZipper :: [V.Vector Char] -> Maybe Int -> TextZipper (V.Vector Char)
 vectorZipper =
-    mkZipper V.singleton V.drop V.take V.length V.last V.init V.null V.vecLines
+    mkZipper V.singleton V.drop V.take V.length V.last V.init V.null V.vecLines V.toList
 
 -- |Empty a zipper.
 clearZipper :: (Monoid a) => TextZipper a -> TextZipper a
@@ -412,4 +418,4 @@ clearZipper tz =
 -- |Construct a zipper from 'T.Text' values.
 textZipper :: [T.Text] -> Maybe Int -> TextZipper T.Text
 textZipper =
-    mkZipper T.singleton T.drop T.take T.length T.last T.init T.null T.lines
+    mkZipper T.singleton T.drop T.take T.length T.last T.init T.null T.lines T.unpack

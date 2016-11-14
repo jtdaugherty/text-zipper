@@ -24,6 +24,7 @@ class Monoid a => GenericTextZipper a where
   init      :: a -> a
   null      :: a -> Bool
   lines     :: a -> [a]
+  toList    :: a -> [Char]
 
 instance GenericTextZipper [Char] where
   singleton = (:[])
@@ -34,6 +35,7 @@ instance GenericTextZipper [Char] where
   init      = Prelude.init
   null      = Prelude.null
   lines     = Prelude.lines
+  toList    = id
 
 instance GenericTextZipper T.Text where
   singleton = T.singleton
@@ -44,6 +46,7 @@ instance GenericTextZipper T.Text where
   init      = T.init
   null      = T.null
   lines     = T.lines
+  toList    = T.unpack
 
 instance GenericTextZipper (V.Vector Char) where
   singleton = V.singleton
@@ -54,8 +57,9 @@ instance GenericTextZipper (V.Vector Char) where
   init      = V.init
   null      = V.null
   lines     = V.vecLines
+  toList    = V.toList
 
 textZipper :: GenericTextZipper a =>
               [a] -> Maybe Int -> TextZipper a
 textZipper =
-  mkZipper singleton drop take length last init null lines
+  mkZipper singleton drop take length last init null lines toList
