@@ -1,3 +1,11 @@
+0.9
+---
+
+- insertChar and insertMany now only insert printable characters and
+  newlines (subject to text zipper line limits)
+- The GenericTextZipper class now requires a new method,
+  toList :: a -> [Char]
+
 0.8.3
 -----
 
