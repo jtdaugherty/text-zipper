@@ -25,21 +25,28 @@ module Data.Text.Zipper
     , lineLengths
     , getLineLimit
 
-    -- *Navigation and editing functions
+    -- *Navigation functions
     , moveCursor
-    , insertChar
-    , insertMany
-    , breakLine
-    , killToEOL
-    , killToBOL
-    , gotoEOL
-    , gotoBOL
-    , deletePrevChar
-    , deleteChar
     , moveRight
     , moveLeft
     , moveUp
     , moveDown
+    , gotoEOL
+    , gotoBOL
+
+    -- *Inspection functions
+    , currentChar
+    , nextChar
+    , previousChar
+
+    -- *Editing functions
+    , insertChar
+    , insertMany
+    , deletePrevChar
+    , deleteChar
+    , breakLine
+    , killToEOL
+    , killToBOL
     , transposeChars
     )
 where
@@ -278,6 +285,25 @@ deleteChar tz
            , below = tail $ below tz
            }
     | otherwise = tz
+
+-- |Get the Char on which the cursor currently resides. If the cursor is at the
+-- end of the text or the text is empty return @'\n'@
+currentChar :: TextZipper a -> Char
+currentChar tz
+  | not (null_ tz (toRight tz)) =
+    last_ tz (take_ tz 1 (toRight tz))
+  | otherwise = '\n'
+
+-- |Get the Char after the cursor position. If the cursor is at the end of a
+-- line return the first character of the next line, or if that one is empty as
+-- well, return @'\n'@
+nextChar :: (Monoid a) => TextZipper a -> Char
+nextChar tz = currentChar (moveRight tz)
+
+-- |Get the Char before the cursor position. If the cursor is at the beginning
+-- of a line, return @'\n'@
+previousChar :: (Monoid a) => TextZipper a -> Char
+previousChar tz = currentChar (moveLeft tz)
 
 -- |Move the cursor to the beginning of the current line.
 gotoBOL :: (Monoid a) => TextZipper a -> TextZipper a
