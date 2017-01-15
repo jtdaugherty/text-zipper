@@ -287,23 +287,29 @@ deleteChar tz
     | otherwise = tz
 
 -- |Get the Char on which the cursor currently resides. If the cursor is at the
--- end of the text or the text is empty return @'\n'@
-currentChar :: TextZipper a -> Char
+-- end of the text or the text is empty return @Nothing@
+currentChar :: TextZipper a -> Maybe Char
 currentChar tz
   | not (null_ tz (toRight tz)) =
-    last_ tz (take_ tz 1 (toRight tz))
-  | otherwise = '\n'
+    Just (last_ tz (take_ tz 1 (toRight tz)))
+  | otherwise = Nothing
 
 -- |Get the Char after the cursor position. If the cursor is at the end of a
 -- line return the first character of the next line, or if that one is empty as
--- well, return @'\n'@
-nextChar :: (Monoid a) => TextZipper a -> Char
+-- well, return @Nothing@
+nextChar :: (Monoid a) => TextZipper a -> Maybe Char
 nextChar tz = currentChar (moveRight tz)
 
 -- |Get the Char before the cursor position. If the cursor is at the beginning
--- of a line, return @'\n'@
-previousChar :: (Monoid a) => TextZipper a -> Char
-previousChar tz = currentChar (moveLeft tz)
+-- of the text, return @Nothing@
+previousChar :: (Monoid a) => TextZipper a -> Maybe Char
+previousChar tz
+  -- Only return Nothing if we are at the beginning of a line and only empty
+  -- lines are above
+  | snd (cursorPosition tz) == 0 && all (null_ tz) (above tz) =
+    Nothing
+  | otherwise =
+    currentChar (moveLeft tz)
 
 -- |Move the cursor to the beginning of the current line.
 gotoBOL :: (Monoid a) => TextZipper a -> TextZipper a
