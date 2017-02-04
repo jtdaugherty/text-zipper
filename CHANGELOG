@@ -1,3 +1,11 @@
+0.10
+----
+
+- Integrated word editing and navigation functions
+  courtesy of Hans-Peter Deifel's hledger-iadd project (see
+  Data.Text.Zipper.Generic.Words)
+- Added currentChar, nextChar, and previousChar (thanks @kRITZCREEK)
+
 0.9
 ---
 
