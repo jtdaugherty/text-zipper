@@ -22,6 +22,7 @@ library
   exposed-modules:
     Data.Text.Zipper
     Data.Text.Zipper.Generic
+    Data.Text.Zipper.Generic.Words
 
   other-modules:
     Data.Text.Zipper.Vector
@@ -33,3 +34,15 @@ library
   ghc-options:         -Wall
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+test-suite text-zipper-tests
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      tests
+  main-is:             Main.hs
+  other-modules:       WordsSpec
+  default-language:    Haskell2010
+  build-depends:       base,
+                       text,
+                       hspec,
+                       QuickCheck,
+                       text-zipper
