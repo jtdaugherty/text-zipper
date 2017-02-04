@@ -286,22 +286,22 @@ deleteChar tz
            }
     | otherwise = tz
 
--- |Get the Char on which the cursor currently resides. If the cursor is at the
--- end of the text or the text is empty return @Nothing@
+-- |Get the Char on which the cursor currently resides. If the cursor is
+-- at the end of the text or the text is empty return @Nothing@.
 currentChar :: TextZipper a -> Maybe Char
 currentChar tz
   | not (null_ tz (toRight tz)) =
     Just (last_ tz (take_ tz 1 (toRight tz)))
   | otherwise = Nothing
 
--- |Get the Char after the cursor position. If the cursor is at the end of a
--- line return the first character of the next line, or if that one is empty as
--- well, return @Nothing@
+-- |Get the Char after the cursor position. If the cursor is at the end
+-- of a line return the first character of the next line, or if that one
+-- is empty as well, return @Nothing@.
 nextChar :: (Monoid a) => TextZipper a -> Maybe Char
 nextChar tz = currentChar (moveRight tz)
 
--- |Get the Char before the cursor position. If the cursor is at the beginning
--- of the text, return @Nothing@
+-- |Get the Char before the cursor position. If the cursor is at the
+-- beginning of the text, return @Nothing@
 previousChar :: (Monoid a) => TextZipper a -> Maybe Char
 previousChar tz
   -- Only return Nothing if we are at the beginning of a line and only empty
