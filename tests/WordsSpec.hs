@@ -152,4 +152,8 @@ deleteToBeginning zipper = case cursorPosition zipper of
     _      -> deleteToBeginning (deletePrevChar (killToBOL zipper))
 
 instance Arbitrary Text where
-    arbitrary = T.pack <$> arbitrary
+    arbitrary = do
+        ls <- lines <$> arbitrary
+        return $ T.pack $ case ls of
+            (l:_) -> l
+            _ -> mempty
