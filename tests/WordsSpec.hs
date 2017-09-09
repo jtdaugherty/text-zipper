@@ -120,7 +120,7 @@ isAtWordEnd zipper = counterexample (show zipper) $
       numLines = length (getText zipper)
       curLine = currentLine zipper
     in
-      (col == T.length curLine && row == numLines)
+      (col == T.length curLine && row == numLines - 1)
       || ((col == T.length curLine || isSpace (T.index curLine col)) -- next is space
           && (col == 0 || not (isSpace (T.index curLine (col-1))))) -- previous is word
 
