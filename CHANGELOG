@@ -1,3 +1,10 @@
+
+0.10.1
+------
+
+ * WordSpec: fix a test verification bug (fixed #11)
+ * WordSpec: generation of random text should never include newlines
+
 0.10
 ----
 
