@@ -250,18 +250,20 @@ gotoEOL tz = tz { toLeft = currentLine tz
 
 -- |Move the cursor to the end of a text zipper.
 gotoEOF :: (Monoid a) => TextZipper a -> TextZipper a
-gotoEOF tz = tz { toLeft = end
-                , toRight = mempty
-                , above = top
-                , below = mempty
-                }
-             where tx = getText tz
-                   (top, end) = if null tx
-                        then (mempty, mempty)
-                        else (init tx, last tx)
+gotoEOF tz =
+    tz { toLeft = end
+       , toRight = mempty
+       , above = top
+       , below = mempty
+       }
+   where
+       tx = getText tz
+       (top, end) = if null tx
+                    then (mempty, mempty)
+                    else (init tx, last tx)
 
 -- |Remove all text from the cursor position to the end of the current
--- line.  If the cursor is at the beginning of a line and the line is
+-- line. If the cursor is at the beginning of a line and the line is
 -- empty, the entire line will be removed.
 killToEOL :: (Monoid a) => TextZipper a -> TextZipper a
 killToEOL tz
@@ -283,16 +285,18 @@ killToBOL tz = tz { toLeft = mempty
 -- zipper.  If the cursor is at the beginning of a line and the line is
 -- empty, the entire line will be removed.
 killToEOF :: (Monoid a) => TextZipper a -> TextZipper a
-killToEOF tz= tz { toRight = mempty
-                     , below = mempty
-                     }
+killToEOF tz =
+    tz { toRight = mempty
+       , below = mempty
+       }
 
 -- |Remove all text from the cursor position to the beginning of the
 -- text zipper.
 killToBOF :: Monoid a => TextZipper a -> TextZipper a
-killToBOF tz = tz { toLeft = mempty
-                  , above = mempty
-                  }
+killToBOF tz =
+    tz { toLeft = mempty
+       , above = mempty
+       }
 
 -- |Delete the character preceding the cursor position, and move the
 -- cursor backwards by one character.
@@ -350,13 +354,15 @@ gotoBOL tz = tz { toLeft = mempty
 
 -- |Move the cursor to the beginning of a text zipper.
 gotoBOF :: (Monoid a) => TextZipper a -> TextZipper a
-gotoBOF tz = tz { toLeft = mempty
-                , toRight = first
-                , above = mempty
-                , below = rest
-                }
-             where tx = getText tz
-                   (first, rest) = if null tx
+gotoBOF tz =
+    tz { toLeft = mempty
+       , toRight = first
+       , above = mempty
+       , below = rest
+       }
+    where
+        tx = getText tz
+        (first, rest) = if null tx
                         then (mempty, mempty)
                         else (head tx, tail tx)
 
