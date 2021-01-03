@@ -1,4 +1,11 @@
 
+0.11
+----
+
+API changes:
+ * Added `gotoBOF`, `gotoEOF`, `killToBOF`, and `killToEOF` functions
+   (thanks Itai Y. Efrat)
+
 0.10.1
 ------
 
