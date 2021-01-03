@@ -1,19 +1,19 @@
--- |This module provides a two-dimensional text zipper data structure.
+-- | This module provides a two-dimensional text zipper data structure.
 -- This structure represents a body of text and an editing cursor
 -- which can be moved throughout the text, along with a set of editing
 -- transformations.
 --
--- Text zippers are generalized over the set of data types that might
--- be used to store lists of characters (e.g., 'String', 'T.Text',
--- etc.).  As a result, the most general way to create a text zipper
--- is to use 'mkZipper' and provide all of the functions required to
--- manipulate the underlying text data.
+-- Text zippers are generalized over the set of data types that might be
+-- used to store lists of characters (e.g., 'String', 'T.Text', etc.).
+-- As a result, the most general way to create a text zipper is to use
+-- 'mkZipper' and provide all of the functions required to manipulate
+-- the underlying text data.
 --
 -- Implementations using 'T.Text' and 'String' are provided.
 module Data.Text.Zipper
     ( TextZipper
 
-    -- *Construction and extraction
+    -- * Construction and extraction
     , mkZipper
     , textZipper
     , stringZipper
@@ -25,7 +25,7 @@ module Data.Text.Zipper
     , lineLengths
     , getLineLimit
 
-    -- *Navigation functions
+    -- * Navigation functions
     , moveCursor
     , moveRight
     , moveLeft
@@ -36,12 +36,12 @@ module Data.Text.Zipper
     , gotoEOF
     , gotoBOF
 
-    -- *Inspection functions
+    -- * Inspection functions
     , currentChar
     , nextChar
     , previousChar
 
-    -- *Editing functions
+    -- * Editing functions
     , insertChar
     , insertMany
     , deletePrevChar
@@ -111,9 +111,9 @@ instance (Show a) => Show (TextZipper a) where
                      , " }"
                      ]
 
--- |Create a zipper using a custom text storage type.  Takes the
--- initial text as well as all of the functions necessary to
--- manipulate the underlying text values.
+-- | Create a zipper using a custom text storage type. Takes the initial
+-- text as well as all of the functions necessary to manipulate the
+-- underlying text values.
 mkZipper :: (Monoid a) =>
             (Char -> a)
          -- ^A singleton constructor.
@@ -147,31 +147,30 @@ mkZipper fromCh drp tk lngth lst int nl linesFunc toListF ls lmt =
                         else (head limitedLs, tail limitedLs)
     in TZ mempty first [] rest fromCh drp tk lngth lst int nl linesFunc toListF lmt
 
--- |Get the text contents of the zipper.
+-- | Get the text contents of the zipper.
 getText :: (Monoid a) => TextZipper a -> [a]
 getText tz = concat [ above tz
                     , [currentLine tz]
                     , below tz
                     ]
 
--- |Return the lengths of the lines in the zipper.
+-- | Return the lengths of the lines in the zipper.
 lineLengths :: (Monoid a) => TextZipper a -> [Int]
 lineLengths tz = (length_ tz) <$> concat [ above tz
                                          , [currentLine tz]
                                          , below tz
                                          ]
 
--- |Get the cursor position of the zipper; returns @(row, col)@.
+-- | Get the cursor position of the zipper; returns @(row, col)@.
 -- @row@ ranges from @[0..num_rows-1]@ inclusive; @col@ ranges from
--- @[0..length of current line]@ inclusive.  Column values equal to
--- line width indicate a cursor that is just past the end of a line of
--- text.
+-- @[0..length of current line]@ inclusive. Column values equal to line
+-- width indicate a cursor that is just past the end of a line of text.
 cursorPosition :: TextZipper a -> (Int, Int)
 cursorPosition tz = (length $ above tz, length_ tz $ toLeft tz)
 
--- |Move the cursor to the specified row and column.  Invalid cursor
--- positions will be ignored.  Valid cursor positions range as
--- described for 'cursorPosition'.
+-- | Move the cursor to the specified row and column. Invalid cursor
+-- positions will be ignored. Valid cursor positions range as described
+-- for 'cursorPosition'.
 moveCursor :: (Monoid a) => (Int, Int) -> TextZipper a -> TextZipper a
 moveCursor (row, col) tz =
     let t = getText tz
@@ -195,11 +194,11 @@ isLastLine = (== 0) . length . below
 nextLine :: TextZipper a -> a
 nextLine = head . below
 
--- |The line of text on which the zipper's cursor currently resides.
+-- | The line of text on which the zipper's cursor currently resides.
 currentLine :: (Monoid a) => TextZipper a -> a
 currentLine tz = (toLeft tz) `mappend` (toRight tz)
 
--- |Insert a character at the current cursor position.
+-- | Insert a character at the current cursor position.
 --
 -- If the character is a newline, break the current line.
 --
@@ -216,7 +215,7 @@ insertChar_ ch tz
     | isPrint ch = Just $ tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
     | otherwise  = Nothing
 
--- |Insert many characters at the current cursor position. Move the
+-- | Insert many characters at the current cursor position. Move the
 -- cursor to the end of the inserted text.
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
 insertMany str tz =
@@ -224,7 +223,7 @@ insertMany str tz =
         go (c:cs) z = maybe z (go cs) $ insertChar_ c z
     in go (toList_ tz str) tz
 
--- |Insert a line break at the current cursor position.
+-- | Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
 breakLine tz = maybe tz id $ breakLine_ tz
 
@@ -242,13 +241,13 @@ breakLine_ tz =
                       else Just modified
           Nothing -> Just modified
 
--- |Move the cursor to the end of the current line.
+-- | Move the cursor to the end of the current line.
 gotoEOL :: (Monoid a) => TextZipper a -> TextZipper a
 gotoEOL tz = tz { toLeft = currentLine tz
                 , toRight = mempty
                 }
 
--- |Move the cursor to the end of a text zipper.
+-- | Move the cursor to the end of a text zipper.
 gotoEOF :: (Monoid a) => TextZipper a -> TextZipper a
 gotoEOF tz =
     tz { toLeft = end
@@ -262,7 +261,7 @@ gotoEOF tz =
                     then (mempty, mempty)
                     else (init tx, last tx)
 
--- |Remove all text from the cursor position to the end of the current
+-- | Remove all text from the cursor position to the end of the current
 -- line. If the cursor is at the beginning of a line and the line is
 -- empty, the entire line will be removed.
 killToEOL :: (Monoid a) => TextZipper a -> TextZipper a
@@ -275,14 +274,14 @@ killToEOL tz
     | otherwise = tz { toRight = mempty
                      }
 
--- |Remove all text from the cursor position to the beginning of the
+-- | Remove all text from the cursor position to the beginning of the
 -- current line.
 killToBOL :: Monoid a => TextZipper a -> TextZipper a
 killToBOL tz = tz { toLeft = mempty
                   }
 
--- |Remove all text from the cursor position to the end of the text
--- zipper.  If the cursor is at the beginning of a line and the line is
+-- | Remove all text from the cursor position to the end of the text
+-- zipper. If the cursor is at the beginning of a line and the line is
 -- empty, the entire line will be removed.
 killToEOF :: (Monoid a) => TextZipper a -> TextZipper a
 killToEOF tz =
@@ -290,7 +289,7 @@ killToEOF tz =
        , below = mempty
        }
 
--- |Remove all text from the cursor position to the beginning of the
+-- | Remove all text from the cursor position to the beginning of the
 -- text zipper.
 killToBOF :: Monoid a => TextZipper a -> TextZipper a
 killToBOF tz =
@@ -298,15 +297,15 @@ killToBOF tz =
        , above = mempty
        }
 
--- |Delete the character preceding the cursor position, and move the
+-- | Delete the character preceding the cursor position, and move the
 -- cursor backwards by one character.
 deletePrevChar :: (Eq a, Monoid a) => TextZipper a -> TextZipper a
 deletePrevChar tz
     | moveLeft tz == tz = tz
     | otherwise = deleteChar $ moveLeft tz
 
--- |Delete the character at the cursor position.  Leaves the cursor
--- position unchanged.  If the cursor is at the end of a line of text,
+-- | Delete the character at the cursor position. Leaves the cursor
+-- position unchanged. If the cursor is at the end of a line of text,
 -- this combines the line with the line below.
 deleteChar :: (Monoid a) => TextZipper a -> TextZipper a
 deleteChar tz
@@ -321,21 +320,21 @@ deleteChar tz
            }
     | otherwise = tz
 
--- |Get the Char on which the cursor currently resides. If the cursor is
--- at the end of the text or the text is empty return @Nothing@.
+-- | Get the Char on which the cursor currently resides. If the cursor
+-- is at the end of the text or the text is empty return @Nothing@.
 currentChar :: TextZipper a -> Maybe Char
 currentChar tz
   | not (null_ tz (toRight tz)) =
     Just (last_ tz (take_ tz 1 (toRight tz)))
   | otherwise = Nothing
 
--- |Get the Char after the cursor position. If the cursor is at the end
+-- | Get the Char after the cursor position. If the cursor is at the end
 -- of a line return the first character of the next line, or if that one
 -- is empty as well, return @Nothing@.
 nextChar :: (Monoid a) => TextZipper a -> Maybe Char
 nextChar tz = currentChar (moveRight tz)
 
--- |Get the Char before the cursor position. If the cursor is at the
+-- | Get the Char before the cursor position. If the cursor is at the
 -- beginning of the text, return @Nothing@
 previousChar :: (Monoid a) => TextZipper a -> Maybe Char
 previousChar tz
@@ -346,13 +345,13 @@ previousChar tz
   | otherwise =
     currentChar (moveLeft tz)
 
--- |Move the cursor to the beginning of the current line.
+-- | Move the cursor to the beginning of the current line.
 gotoBOL :: (Monoid a) => TextZipper a -> TextZipper a
 gotoBOL tz = tz { toLeft = mempty
                 , toRight = currentLine tz
                 }
 
--- |Move the cursor to the beginning of a text zipper.
+-- | Move the cursor to the beginning of a text zipper.
 gotoBOF :: (Monoid a) => TextZipper a -> TextZipper a
 gotoBOF tz =
     tz { toLeft = mempty
@@ -366,9 +365,9 @@ gotoBOF tz =
                         then (mempty, mempty)
                         else (head tx, tail tx)
 
--- |Move the cursor right by one position.  If the cursor is at the
--- end of a line, the cursor is moved to the first position of the
--- following line (if any).
+-- | Move the cursor right by one position. If the cursor is at the end
+-- of a line, the cursor is moved to the first position of the following
+-- line (if any).
 moveRight :: (Monoid a) => TextZipper a -> TextZipper a
 moveRight tz
     -- Are we able to keep moving right on the current line?
@@ -387,9 +386,9 @@ moveRight tz
            }
     | otherwise = tz
 
--- |Move the cursor left by one position.  If the cursor is at the
--- beginning of a line, the cursor is moved to the last position of
--- the preceding line (if any).
+-- | Move the cursor left by one position. If the cursor is at the
+-- beginning of a line, the cursor is moved to the last position of the
+-- preceding line (if any).
 moveLeft :: (Monoid a) => TextZipper a -> TextZipper a
 moveLeft tz
     -- Are we able to keep moving left on the current line?
@@ -408,8 +407,8 @@ moveLeft tz
            }
     | otherwise = tz
 
--- |Move the cursor up by one row.  If there no are rows above the
--- current one, move to the first position of the current row.  If the
+-- | Move the cursor up by one row. If there no are rows above the
+-- current one, move to the first position of the current row. If the
 -- row above is shorter, move to the end of that row.
 moveUp :: (Monoid a) => TextZipper a -> TextZipper a
 moveUp tz
@@ -431,9 +430,9 @@ moveUp tz
     -- If nothing else, go to the beginning of the current line
     | otherwise = gotoBOL tz
 
--- |Move the cursor down by one row.  If there are no rows below the
--- current one, move to the last position of the current row.  If the
--- row below is shorter, move to the end of that row.
+-- | Move the cursor down by one row. If there are no rows below the
+-- current one, move to the last position of the current row. If the row
+-- below is shorter, move to the end of that row.
 moveDown :: (Monoid a) => TextZipper a -> TextZipper a
 moveDown tz
     -- Is there a line below at least as long as the current one?
@@ -477,17 +476,17 @@ transposeChars tz
                      , toRight = (drop_ tz 1 $ toRight tz)
                      }
 
--- |Construct a zipper from list values.
+-- | Construct a zipper from list values.
 stringZipper :: [String] -> Maybe Int -> TextZipper String
 stringZipper =
     mkZipper (:[]) drop take length last init null lines id
 
--- |Construct a zipper from vectors of characters.
+-- | Construct a zipper from vectors of characters.
 vectorZipper :: [V.Vector Char] -> Maybe Int -> TextZipper (V.Vector Char)
 vectorZipper =
     mkZipper V.singleton V.drop V.take V.length V.last V.init V.null V.vecLines V.toList
 
--- |Empty a zipper.
+-- | Empty a zipper.
 clearZipper :: (Monoid a) => TextZipper a -> TextZipper a
 clearZipper tz =
     tz { toLeft = mempty
@@ -496,7 +495,7 @@ clearZipper tz =
        , below = []
        }
 
--- |Construct a zipper from 'T.Text' values.
+-- | Construct a zipper from 'T.Text' values.
 textZipper :: [T.Text] -> Maybe Int -> TextZipper T.Text
 textZipper =
     mkZipper T.singleton T.drop T.take T.length T.last T.init T.null T.lines T.unpack
