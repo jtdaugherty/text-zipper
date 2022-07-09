@@ -1,4 +1,11 @@
 
+0.12
+----
+
+API changes:
+ * Added `moveCursorClosest` to allow cursor placement as near as
+   possible to a specified location.
+
 0.11
 ----
 
