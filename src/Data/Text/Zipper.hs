@@ -27,6 +27,7 @@ module Data.Text.Zipper
 
     -- * Navigation functions
     , moveCursor
+    , moveCursorClosest
     , moveRight
     , moveLeft
     , moveUp
@@ -184,6 +185,22 @@ moveCursor (row, col) tz =
                , toLeft = take_ tz col (t !! row)
                , toRight = drop_ tz col (t !! row)
                }
+
+-- | Move the cursor to the specified row and column. Invalid cursor
+-- positions will be reinterpreted as the closest valid position. Valid
+-- cursor positions range as described for 'cursorPosition'.
+moveCursorClosest :: (Monoid a) => (Int, Int) -> TextZipper a -> TextZipper a
+moveCursorClosest (row, col) tz =
+    let t = getText tz
+        bestRow = min (max 0 $ length t - 1) $ max 0 row
+        bestCol = if bestRow < length t
+                  then min (length_ tz (t !! bestRow)) $ max 0 col
+                  else 0
+    in tz { above = take bestRow t
+          , below = drop (bestRow + 1) t
+          , toLeft = take_ tz bestCol (t !! bestRow)
+          , toRight = drop_ tz bestCol (t !! bestRow)
+          }
 
 isFirstLine :: TextZipper a -> Bool
 isFirstLine = null . above
