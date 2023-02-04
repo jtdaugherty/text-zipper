@@ -236,7 +236,7 @@ insertChar ch tz
 -- | Insert many characters at the current cursor position. Move the
 -- cursor to the end of the inserted text.
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
-insertMany str tz = foldl' (\z c -> insertChar c z) tz $ toList_ tz str
+insertMany str tz = foldl' (flip insertChar) tz $ toList_ tz str
 
 -- | Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
