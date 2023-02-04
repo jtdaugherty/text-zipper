@@ -15,10 +15,24 @@ import Data.Text.Zipper.Generic.Words
 
 spec :: Spec
 spec = do
+    insertCharSpec
+    insertManySpec
     moveWordLeftSpec
     moveWordRightSpec
     deletePrevWordSpec
     deleteWordSpec
+
+insertCharSpec :: Spec
+insertCharSpec = describe "insertChar" $ do
+    it "ignores an insert of a non-printable character" $
+      let z = stringZipper [] Nothing
+      in (insertChar '\x1b' z) `shouldBe` z
+
+insertManySpec :: Spec
+insertManySpec = describe "insertMany" $ do
+    it "ignores an insert of a non-printable character" $
+      let z = stringZipper ["abc"] Nothing
+      in (insertMany "ghi\x1bjkl" z) `shouldBe` (insertMany "ghijkl" z)
 
 moveWordLeftSpec :: Spec
 moveWordLeftSpec = describe "moveWordLeft" $ do

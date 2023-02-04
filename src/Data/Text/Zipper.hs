@@ -224,28 +224,22 @@ currentLine tz = (toLeft tz) `mappend` (toRight tz)
 -- Otherwise insert the character and move the cursor one position to
 -- the right.
 insertChar :: (Monoid a) => Char -> TextZipper a -> TextZipper a
-insertChar ch tz = maybe tz id $ insertChar_ ch tz
-
-insertChar_ :: (Monoid a) => Char -> TextZipper a -> Maybe (TextZipper a)
-insertChar_ ch tz
-    | ch == '\n' = breakLine_ tz
-    | isPrint ch = Just $ tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
-    | otherwise  = Nothing
+insertChar ch tz
+    | ch == '\n' = breakLine tz
+    | isPrint ch = tz { toLeft = toLeft tz `mappend` (fromChar tz ch) }
+    | otherwise  = tz
 
 -- | Insert many characters at the current cursor position. Move the
 -- cursor to the end of the inserted text.
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
 insertMany str tz =
     let go [] z = z
-        go (c:cs) z = maybe z (go cs) $ insertChar_ c z
+        go (c:cs) z = go cs $ insertChar c z
     in go (toList_ tz str) tz
 
 -- | Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
-breakLine tz = maybe tz id $ breakLine_ tz
-
-breakLine_ :: (Monoid a) => TextZipper a -> Maybe (TextZipper a)
-breakLine_ tz =
+breakLine tz =
     -- Plus two because we count the current line and the line we are
     -- about to create; if that number of lines exceeds the limit,
     -- ignore this operation.
@@ -254,9 +248,9 @@ breakLine_ tz =
                       }
     in case lineLimit tz of
           Just lim -> if length (above tz) + length (below tz) + 2 > lim
-                      then Nothing
-                      else Just modified
-          Nothing -> Just modified
+                      then tz
+                      else modified
+          Nothing -> modified
 
 -- | Move the cursor to the end of the current line.
 gotoEOL :: (Monoid a) => TextZipper a -> TextZipper a
