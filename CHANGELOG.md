@@ -1,4 +1,13 @@
 
+0.13
+----
+
+Bug fixes:
+ * The zipper constructors now ignores non-printable characters (see
+   also #13)
+ * `insertMany` now no longer drops the input following a non-printable
+   character (#13)
+
 0.12
 ----
 
