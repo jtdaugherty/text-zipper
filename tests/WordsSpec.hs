@@ -3,8 +3,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module WordsSpec (spec) where
 
--- This test suite is Copyright (c) Hans-Peter Deifel
-
 import Test.Hspec
 import Test.QuickCheck
 
