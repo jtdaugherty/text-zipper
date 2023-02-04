@@ -146,7 +146,10 @@ mkZipper fromCh drp tk lngth lst int nl linesFunc toListF ls lmt =
         (first, rest) = if null limitedLs
                         then (mempty, mempty)
                         else (head limitedLs, tail limitedLs)
-    in TZ mempty first [] rest fromCh drp tk lngth lst int nl linesFunc toListF lmt
+        numLines = length ls
+        insertLine z (i, l) = (if i < numLines - 1 then breakLine else id) $ insertMany l z
+        loadInitial z = foldl insertLine z $ zip [0..] (first:rest)
+    in loadInitial $ TZ mempty mempty mempty mempty fromCh drp tk lngth lst int nl linesFunc toListF lmt
 
 -- | Get the text contents of the zipper.
 getText :: (Monoid a) => TextZipper a -> [a]
@@ -232,10 +235,7 @@ insertChar ch tz
 -- | Insert many characters at the current cursor position. Move the
 -- cursor to the end of the inserted text.
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
-insertMany str tz =
-    let go [] z = z
-        go (c:cs) z = go cs $ insertChar c z
-    in go (toList_ tz str) tz
+insertMany str tz = foldl (\z c -> insertChar c z) tz $ toList_ tz str
 
 -- | Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a

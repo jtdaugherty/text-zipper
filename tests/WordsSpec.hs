@@ -15,12 +15,18 @@ import Data.Text.Zipper.Generic.Words
 
 spec :: Spec
 spec = do
+    constructorSpec
     insertCharSpec
     insertManySpec
     moveWordLeftSpec
     moveWordRightSpec
     deletePrevWordSpec
     deleteWordSpec
+
+constructorSpec :: Spec
+constructorSpec = describe "constructor" $ do
+    it "inserts only printable characters at construction time" $
+      (stringZipper ["abc\x1b def"] Nothing) `shouldBe` (stringZipper ["abc def"] Nothing)
 
 insertCharSpec :: Spec
 insertCharSpec = describe "insertChar" $ do
