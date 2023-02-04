@@ -59,6 +59,7 @@ where
 import Control.Applicative ((<$>))
 import Control.DeepSeq
 import Data.Char (isPrint)
+import Data.List (foldl')
 import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Vector as V
@@ -148,7 +149,7 @@ mkZipper fromCh drp tk lngth lst int nl linesFunc toListF ls lmt =
                         else (head limitedLs, tail limitedLs)
         numLines = length ls
         insertLine z (i, l) = (if i < numLines - 1 then breakLine else id) $ insertMany l z
-        loadInitial z = foldl insertLine z $ zip [0..] (first:rest)
+        loadInitial z = foldl' insertLine z $ zip [0..] (first:rest)
     in loadInitial $ TZ mempty mempty mempty mempty fromCh drp tk lngth lst int nl linesFunc toListF lmt
 
 -- | Get the text contents of the zipper.
@@ -235,7 +236,7 @@ insertChar ch tz
 -- | Insert many characters at the current cursor position. Move the
 -- cursor to the end of the inserted text.
 insertMany :: (Monoid a) => a -> TextZipper a -> TextZipper a
-insertMany str tz = foldl (\z c -> insertChar c z) tz $ toList_ tz str
+insertMany str tz = foldl' (\z c -> insertChar c z) tz $ toList_ tz str
 
 -- | Insert a line break at the current cursor position.
 breakLine :: (Monoid a) => TextZipper a -> TextZipper a
