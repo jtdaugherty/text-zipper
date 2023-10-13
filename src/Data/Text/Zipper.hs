@@ -32,6 +32,8 @@ module Data.Text.Zipper
     , moveLeft
     , moveUp
     , moveDown
+    , moveNextParagraph
+    , movePrevParagraph
     , gotoEOL
     , gotoBOL
     , gotoEOF
@@ -464,6 +466,23 @@ moveDown tz
            }
     -- If nothing else, go to the end of the current line
     | otherwise = gotoEOL tz
+
+-- | Move the cursor to the next paragraph. 
+-- Find the next empty line (similar to vim's } key binding)
+moveNextParagraph :: (Monoid a, Eq a) => TextZipper a -> TextZipper a
+moveNextParagraph zipper =
+    if (nextLine zipper) == mempty 
+        then nextLine zipper
+        else moveNextParagraph (moveDown zipper)
+
+-- | Move the cursor to the prev paragraph. 
+-- Find the previous empty line (similar to vim's { key binding)
+movePrevParagraph :: (Monoid a, Eq a) => TextZipper a -> TextZipper a
+movePrevParagraph zipper =
+    let pz = currentLine $ moveUp zipper
+    if pz == mempty 
+        then moveUp zipper
+        else movePrevParagraph (moveUp zipper)
 
 -- | Transpose the character before the cursor with the one at the
 -- cursor position and move the cursor one position to the right. If
