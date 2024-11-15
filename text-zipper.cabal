@@ -41,6 +41,7 @@ test-suite text-zipper-tests
   main-is:             Main.hs
   other-modules:       WordsSpec
   default-language:    Haskell2010
+  build-tool-depends:  hspec-discover:hspec-discover
   build-depends:       base,
                        text,
                        hspec,
